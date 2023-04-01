@@ -1,6 +1,6 @@
 import { StyleSheet, View, Pressable, Text } from 'react-native';
 
-export default function Button({ label, onPress, color }) {
+export default function Button({ label, onPress = () => {}, color }) {
   if (!onPress) {
     throw new Error('You must provide an onPress function to the Button component.');
   }

@@ -1,25 +1,26 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Camera } from 'expo-camera';
 import { Ionicons } from '@expo/vector-icons';
 
 const CameraComponent = ({ onPictureTaken }) => {
   const [hasPermission, setHasPermission] = useState(null);
-  const [cameraRef, setCameraRef] = useState(null);
   const [isCameraReady, setIsCameraReady] = useState(false);
-  const [cameraType, setCameraType] = useState(Camera.Constants.Type.back);
+  const [cameraType, setCameraType] = useState(Camera.Constants.Type.front);
+
+  const cameraRef = useRef(null);
 
   useEffect(() => {
     (async () => {
-      const { status } = await Camera.requestPermissionsAsync();
+      const { status } = await Camera.requestCameraPermissionsAsync();
       setHasPermission(status === 'granted');
     })();
   }, []);
 
   const takePicture = async () => {
-    if (isCameraReady && cameraRef) {
-      const photo = await cameraRef.takePictureAsync();
-      onPictureTaken(photo);
+    if (isCameraReady && cameraRef.current) {
+      const photo = await cameraRef.current.takePictureAsync();
+      onPictureTaken(photo.uri);
     }
   };
 
@@ -44,7 +45,7 @@ const CameraComponent = ({ onPictureTaken }) => {
 
   return (
     <View style={styles.container}>
-      <Camera style={styles.camera} ref={(ref) => setCameraRef(ref)} type={cameraType} onCameraReady={handleCameraReady}>
+      <Camera style={styles.camera} ref={cameraRef} type={cameraType} onCameraReady={handleCameraReady}>
         <TouchableOpacity style={styles.captureButton} onPress={takePicture}>
           <Ionicons name="ios-camera" size={50} color="#fff" />
         </TouchableOpacity>
@@ -59,19 +60,19 @@ const CameraComponent = ({ onPictureTaken }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    marginBottom: 20,
   },
   camera: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    alignItems: 'center',
+    height: 500,
   },
   captureButton: {
-    marginBottom: 20,
+    bottom: -450,
+    alignSelf: 'center',
   },
   flipButton: {
     position: 'absolute',
-    top: 20,
-    right: 20,
+    top: 0,
+    right: 5,
   },
 });
 
